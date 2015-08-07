@@ -20,7 +20,7 @@ bool modbusServer::isRunning() {
     return m_initialized;
 }
 
-bool modbusServer::initModbus(int port = 502, bool debugging = false) {
+bool modbusServer::initModbus(int port, bool debugging) {
     ctx = modbus_new_tcp("0.0.0.0", port);
 
     modbus_set_debug(ctx, debugging);
@@ -30,6 +30,8 @@ bool modbusServer::initModbus(int port = 502, bool debugging = false) {
         throw -1;
     }
     m_modbusSocket  = modbus_tcp_listen(ctx, 1);
+
+    mapping = modbus_mapping_new(500,500,500,500);
 
     m_initialized   = true;
 
@@ -44,6 +46,7 @@ bool modbusServer::setRegisterValue(int registerNumber, uint16_t value) {
 }
 
 uint16_t modbusServer::getRegisterValue(int registerNumber) {
+
     if(!m_initialized) return -1;
 
     std::mutex mappingLock;
@@ -56,12 +59,13 @@ uint16_t modbusServer::getRegisterValue(int registerNumber) {
 }
 
 void modbusServer::recieveMessages(){
+
     modbus_tcp_accept(ctx, &m_modbusSocket);
 
     if(m_modbusSocket == -1) std::cerr << modbus_strerror(errno) << std::endl;
 
     int rc;
-    uint8_t *query;
+    uint8_t query[MODBUS_TCP_MAX_ADU_LENGTH];
 
     for(;;){
         rc  = modbus_receive(ctx, query);

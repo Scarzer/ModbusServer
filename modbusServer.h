@@ -20,10 +20,11 @@ public:
     void        recieveMessages();
 
     bool        initModbus(int port, bool debugging);
-    uint16_t    getRegisterValue(int registerNumber);
-    bool        setRegisterValue(int registerNumber, uint16_t value);
-
     bool        isRunning();
+
+    bool        setRegisterValue(int registerNumber, uint16_t value);
+    uint16_t    getRegisterValue(int registerNumber);
+
 
 private:
     modbus_t            *ctx;
@@ -32,7 +33,6 @@ private:
     bool        m_initialized;
     int         m_modbusSocket;
     int         m_port;
-
     int         m_errCount;
 
     // Mapping!
